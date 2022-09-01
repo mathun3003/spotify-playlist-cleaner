@@ -1,0 +1,4 @@
+python-dotenv==0.20.0
+requests==2.28.1
+spotipy==2.20.0
+pandas==1.4.4

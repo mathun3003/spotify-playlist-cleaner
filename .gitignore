@@ -1,0 +1,7 @@
+*.env
+*.cache
+*.json
+*.ipynb
+.idea/
+.ipynb_checkpoints
+/venv/
