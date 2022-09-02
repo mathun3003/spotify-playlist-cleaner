@@ -1,78 +1,60 @@
-from base64 import b64encode
 import os
 from dotenv import load_dotenv
 import requests
 import webbrowser
-load_dotenv()
-
-# get secrets
-client_id = os.getenv('CLIENT_ID')
-client_secret = os.getenv('CLIENT_SECRET')
-redirect_uri = os.getenv('REDIRECT_URI')
-bearer_token = os.getenv('BEARER_TOKEN')
-code = os.getenv('CODE')
-
-# encode client_id and client_secret to base64 byte
-# bearer_token = b64encode(f'{client_id}:{client_secret}'.encode('utf-8'))
-
-# curl https://accounts.spotify.com/authorize?client_id=5eb98124ca35416cb33192b9dda1d5c7&response_type=code&redirect_uri=http://localhost:9001/callback&scope=user-library-read%20playlist-read-private
 
 
-access_token_link = f"""
-                  https://accounts.spotify.com/authorize
-                  ?client_id={client_id}
-                    &response_type=code
-                    &redirect_uri={redirect_uri}
-                    &scope=user-library-read%20playlist-read-private
+class SpotifyAuthorizer:
+    def __init__(self):
+        load_dotenv()
+        self.client_id = os.getenv('CLIENT_ID')
+        self.client_secret = os.getenv('CLIENT_SECRET')
+        self.redirect_uri = os.getenv('REDIRECT_URI')
+        self.bearer_token = os.getenv('BEARER_TOKEN')
+        self.access_token = os.getenv('ACCESS_TOKEN')
+        self.refresh_token = os.getenv('REFRESH_TOKEN')
+
+        """
+        Playlist Scopes:
+        - playlist-read-collaborative
+        - playlist-modify-public
+        - playlist-read-private
+        - playlist-modify-private
+        """
+
+    def invoke_code_url(self, scopes: list()) -> str:
+        # create scope string
+        scope_string = f'{scopes[0]}' + ''.join(['%20' + scope for scope in scopes[1:]])
+
+        # generate code_url
+        code_url = f"""
+                    https://accounts.spotify.com/authorize?client_id={self.client_id}
+                        &response_type=code
+                        &redirect_uri={self.redirect_uri}
+                        &scope={scope_string}
                     """
 
-refresh_token_link = f"""
-                    curl -H "Authorization: Basic {bearer_token}"
-                    -d grant_type=authorization_code
-                    -d code=...
-                    -d redirect_uri={b64encode(redirect_uri.encode('utf-8'))} 
-                    https://accounts.spotify.com/api/token
-                    """
+        # invoke generated URL
+        webbrowser.open(code_url, new=0, autoraise=True)
 
+        return code_url
 
-def invoke_code_url(client_id: str, redirect_uri: str, scopes: list()) -> str:
-    # generate code_url
-    code_url = f"""
-                https://accounts.spotify.com/authorize?client_id={client_id}
-                    &response_type=code
-                    &redirect_uri={redirect_uri}
-                    &scope=
-                """
-    # adjust scopes dynamically
-    for scope in scopes:
-        if len(scopes) < 2:
-            code_url += scope
-        else:
-            code_url += scope + "%20"
-    if len(scopes) >= 2:
-        code_url = code_url[:-3]
+    def refresh_access_token(self):
+        """
+        Refresh Access Token by overwriting it
+        ======================================
+        :return: Refreshed access_token
+        """
+        url = "https://accounts.spotify.com/api/token"
 
-    # invoke generated URL
-    webbrowser.open(code_url, new=0, autoraise=True)
+        response = requests.post(url,
+                                 params={'grant_type': 'refresh_token',
+                                         'refresh_token': self.refresh_token},
+                                 headers={'Authorization': f"Basic {self.bearer_token}",
+                                          'Content-Type': 'application/x-www-form-urlencoded'})
+        response_json = response.json()
 
-    return code_url
+        # refresh access token by overwriting it
+        self.access_token = response_json['access_token']
 
-
-def refresh_access_token(url: str) -> str:
-    """
-    Function to refresh the Access Token
-    ====================================
-    :param url: Refresh URL
-    :return: refreshed Access Token
-    """
-    try:
-        response = requests.post(url)
-        content = response.content
-    except ConnectionError as e:
-        print(e)
-
-    return
-
-
-url = invoke_code_url(client_id, redirect_uri, scopes=['user-library-read', 'playlist-read-private'])
-print(url)
+        return response_json['access_token']
