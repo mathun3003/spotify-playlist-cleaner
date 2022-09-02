@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 import os
 from datetime import datetime
 import requests
+import json
 
 
 class SpotifyPlaylistCleaner:
@@ -77,6 +78,11 @@ class SpotifyPlaylistCleaner:
         return df
 
     def add_songs_to_playlist(self, outdated_songs: pd.DataFrame):
+        """
+
+        :param outdated_songs:
+        :return:
+        """
         # only add the songs that do not already exist in the playlist
         url = f"https://api.spotify.com/v1/playlists/{self.store_playlist_id}/tracks"
 
@@ -113,11 +119,35 @@ class SpotifyPlaylistCleaner:
 
         return response_status_codes
 
-    def remove_songs_from_playlist(self, df: pd.DataFrame, time_dif_col: str, num_days: int):
+    def remove_songs_from_playlist(self, songs: pd.DataFrame, time_dif_col: str, num_days: int):
+        """
+        Remove Songs from a playlist
+        ========================================================================
+        :param songs: Songs from a playlist
+        :param time_dif_col: Column expressing the time difference between today
+               and added_at date
+        :param num_days: Number of days after which the songs should be removed
+        :return: DataFrame with the removed songs
+        """
         # remove all songs older than the specified number of days
-        songs_to_remove = df[df[time_dif_col] > pd.to_timedelta(f'{str(num_days)} days')]
-        # TODO: write DELETE request
-
+        songs_to_remove = songs[songs[time_dif_col] > pd.to_timedelta(f'{str(num_days)} days')]
+        # create request body for DELETE request
+        songs_to_remove_lst = []
+        for uri in songs_to_remove['track_id'].to_list():
+            uri_dict = {"uri": f"spotify:track:{uri}"}
+            songs_to_remove_lst.append(uri_dict)
+        # batch processing, since Spotify can only handle batches of size 100
+        url = f"https://api.spotify.com/v1/playlists/{self.playlist_id}/tracks"
+        num_tracks = len(songs_to_remove_lst)
+        step_size = 100
+        for batch in range(0, num_tracks, step_size):
+            batch_lst = songs_to_remove_lst[batch:batch+step_size]
+            request_body = {"tracks": batch_lst}
+            response = requests.delete(url,
+                                       headers={'Content-Type': 'application/json',
+                                                'Accept': 'application/json',
+                                                'Authorization': f'Bearer {self.access_token}'},
+                                       data=json.dumps(request_body))
         return songs_to_remove
 
 

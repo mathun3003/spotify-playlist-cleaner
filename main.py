@@ -1,5 +1,4 @@
 from turtledemo.minimal_hanoi import play
-
 from playlist_cleaner import SpotifyPlaylistCleaner
 from auth import SpotifyAuthorizer
 
@@ -15,9 +14,10 @@ if status_code != 200:
 tracks = spc.collect_songs(playlist_json)
 tracks = spc.calc_time_dif(tracks, 'added_at')
 removed_songs = spc.remove_songs_from_playlist(df=tracks,
-                                                 time_dif_col='time_dif',
-                                                 num_days=425)
-spc.add_songs_to_playlist(removed_songs)
+                                               time_dif_col='time_dif',
+                                               num_days=550)
+adding_status_code = spc.add_songs_to_playlist(removed_songs)
+print(adding_status_code)
 
 # TODO: add logs
 
