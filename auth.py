@@ -14,15 +14,18 @@ class SpotifyAuthorizer:
         self.access_token = os.getenv('ACCESS_TOKEN')
         self.refresh_token = os.getenv('REFRESH_TOKEN')
 
-        """
-        Playlist Scopes:
-        - playlist-read-collaborative
-        - playlist-modify-public
-        - playlist-read-private
-        - playlist-modify-private
-        """
-
     def invoke_code_url(self, scopes: list()) -> str:
+        """
+        Invoke the authorization URL in order to receive the first
+        valid token. A browser login window will be opened.
+        ============================================================
+        :param scopes: Spotify API scopes. Pick from playlist scopes:
+               - playlist-read-collaborative
+               - playlist-modify-public
+               - playlist-read-private
+               - playlist-modify-private
+        :return: Login URL
+        """
         # create scope string
         scope_string = f'{scopes[0]}' + ''.join(['%20' + scope for scope in scopes[1:]])
 
