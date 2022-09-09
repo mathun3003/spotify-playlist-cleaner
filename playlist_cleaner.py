@@ -87,7 +87,7 @@ class SpotifyPlaylistCleaner:
         :return: status code list
         """
         if outdated_songs.empty:
-            return None
+            return list()
         else:
             # receive number of tracks from destination playlist
             url = f"https://api.spotify.com/v1/playlists/{self.destination_playlist_id}/tracks"
@@ -111,10 +111,10 @@ class SpotifyPlaylistCleaner:
                     track_ids.append(tracks_batch['items'][num]['track']['id'])
             # filter existing songs
             songs_to_add = outdated_songs[~outdated_songs['track_id'].isin(track_ids)]
+            response_status_codes = list()
             # add songs to destination playlist
             for uri in songs_to_add['track_id'].to_list():
                 uri_string = f"spotify:track:{uri}"
-                response_status_codes = list()
                 response = requests.post(url,
                                          headers={'Accept': 'application/json',
                                                   'Content-Type': 'application/json',
@@ -157,5 +157,3 @@ class SpotifyPlaylistCleaner:
                                                     'Authorization': f'Bearer {self.access_token}'},
                                            data=json.dumps(request_body))
             return songs_to_remove
-
-

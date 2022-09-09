@@ -2,14 +2,14 @@ name: run main.py
 
 on:
   schedule:
-    -cron 0 8 1 * *
+    - cron: '0 8 1 * *'
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: checkout repo content
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: setup Python
         uses: actions/setup-python@v4
@@ -23,12 +23,12 @@ jobs:
 
       - name: execute Python script
         env:
-          client_id: ${{ secrets.CLIENT_ID }}
-          client_secret: ${{ secrets.CLIENT_SECRET }}
-          redirect_uri: ${{ secrets.REDIRECT_URI }}
-          bearer_token: ${{ secrets.BEARER_TOKEN }}
-          access_token: ${{ secrets.ACCESS_TOKEN }}
-          refresh_token: ${{ secrets.REFRESH_TOKEN }}
-          source_playlist_id: ${{ secrets.SOURCE_PLAYLIST_ID }}
-          destination_playlist_id: ${{ secrets.DESTINATION_PLAYLIST_ID }}
+          CLIENT_ID: ${{ secrets.CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+          REDIRECT_URI: ${{ secrets.REDIRECT_URI }}
+          BEARER_TOKEN: ${{ secrets.BEARER_TOKEN }}
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          REFRESH_TOKEN: ${{ secrets.REFRESH_TOKEN }}
+          SOURCE_PLAYLIST_ID: ${{ secrets.SOURCE_PLAYLIST_ID }}
+          DESTINATION_PLAYLIST_ID: ${{ secrets.DESTINATION_PLAYLIST_ID }}
         run: python main.py

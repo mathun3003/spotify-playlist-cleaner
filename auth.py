@@ -59,5 +59,6 @@ class SpotifyAuthorizer:
 
         # refresh access token by overwriting it
         self.access_token = response_json['access_token']
+        os.environ["ACCESS_TOKEN"] = str(response_json["access_token"])
 
         return response_json['access_token']
