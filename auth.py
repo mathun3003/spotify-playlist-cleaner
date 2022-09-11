@@ -24,8 +24,11 @@ class SpotifyAuthorizer:
                - playlist-modify-public
                - playlist-read-private
                - playlist-modify-private
+               - user-read-recently-played
+               - user-read-playback-position
         :return: Login URL
         """
+
         # create scope string
         scope_string = f'{scopes[0]}' + ''.join(['%20' + scope for scope in scopes[1:]])
 
@@ -36,6 +39,8 @@ class SpotifyAuthorizer:
                         &redirect_uri={self.redirect_uri}
                         &scope={scope_string}
                     """
+
+        code_url = code_url.replace('\n', '').replace(' ', '')
 
         # invoke generated URL
         webbrowser.open(code_url, new=0, autoraise=True)

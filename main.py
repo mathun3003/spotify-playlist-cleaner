@@ -4,7 +4,7 @@ from datetime import datetime
 from turtledemo.minimal_hanoi import play
 from playlist_cleaner import SpotifyPlaylistCleaner
 from auth import SpotifyAuthorizer
-from email import send_email
+from send_email import send_email
 
 # instantiate SpotifyAuthorizer for OAuth
 authorizer = SpotifyAuthorizer()
@@ -54,4 +54,4 @@ else:
     # logging
     logging.info(logging_info)
     # send email
-    send_email(logging_info)
+    # FIXME send_email(logging_info)
