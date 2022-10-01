@@ -49,7 +49,7 @@ else:
     Time: {datetime.now()}
     
     Transferred songs: {' '.join(song + f'({artist}),' for song, artist in zip(tracks, artists))}
-    Status Codes: {' '.join(status_code + ',' for status_code in status_codes)}
+    Status Codes: {' '.join(str(status_code) + ',' for status_code in status_codes)}
     """
     # logging
     logging.info(logging_info)
